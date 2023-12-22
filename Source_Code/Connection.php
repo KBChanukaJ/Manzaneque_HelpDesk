@@ -13,8 +13,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-echo "Connected successfully";
+// Uncomment the line below if you want to verify the connection message
+// echo "Connected successfully";
 
-// Close connection when done
-$conn->close();
+// Do not close the connection here; close it in the files where it's no longer needed
+// $conn->close();
 ?>
