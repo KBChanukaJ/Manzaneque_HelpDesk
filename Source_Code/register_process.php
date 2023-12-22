@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Execute the query
             if ($conn->query($insertQuery) === TRUE) {
-                showAlert("Registration successful!", 'register.php');
+                showAlert("Registration successful!", 'login.php');
             } else {
                 showAlert("Error: Registration failed. " . $conn->error, 'register.php');
             }
