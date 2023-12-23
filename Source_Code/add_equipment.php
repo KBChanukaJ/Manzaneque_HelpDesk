@@ -13,24 +13,40 @@ $operatorID = $_SESSION['operatorID'];
 // Include the database connection file
 include('Connection.php');
 
-// Initialize variables for search and query
-$search = "";
-$query = "SELECT * FROM Personnel";
+// Initialize variables for form input and validation
+$equipmentID = "";
+$equipmentType = "";
+$equipmentMake = "";
+$serialNumber = "";
+$errorMessage = "";
+$successMessage = "";
 
-// Check if the search form is submitted
+// Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $search = $_POST['search'];
-    $query .= " WHERE Name LIKE '%$search%' OR JobTitle LIKE '%$search%' OR Department LIKE '%$search%'";
+    // Validate and sanitize form inputs
+    $equipmentID = filter_input(INPUT_POST, 'equipmentID', FILTER_SANITIZE_NUMBER_INT);
+    $equipmentType = filter_input(INPUT_POST, 'equipmentType', FILTER_SANITIZE_STRING);
+    $equipmentMake = filter_input(INPUT_POST, 'equipmentMake', FILTER_SANITIZE_STRING);
+    $serialNumber = filter_input(INPUT_POST, 'serialNumber', FILTER_SANITIZE_STRING);
+
+    // Check if EquipmentID is already registered
+    $checkExistenceSql = "SELECT * FROM Equipment WHERE EquipmentID = '$equipmentID'";
+    $existenceResult = $conn->query($checkExistenceSql);
+    if ($existenceResult->num_rows > 0) {
+        $errorMessage = "Equipment with ID $equipmentID is already registered.";
+    } else {
+        // Insert data into the Equipment table
+        $insertSql = "INSERT INTO Equipment (EquipmentID, EquipmentType, EquipmentMake, SerialNumber) 
+                      VALUES ('$equipmentID', '$equipmentType', '$equipmentMake', '$serialNumber')";
+        
+        // Execute the query
+        if ($conn->query($insertSql) === TRUE) {
+            $successMessage = "Equipment registration successful!";
+        } else {
+            $errorMessage = "Error: " . $insertSql . "<br>" . $conn->error;
+        }
+    }
 }
-
-// Execute the query
-$result = $conn->query($query);
-
-// Check for errors
-if (!$result) {
-    die("Error: " . $conn->error);
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -40,7 +56,7 @@ if (!$result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css"> <!-- Your custom CSS file -->
-    <title>View Personnel</title>
+    <title>Add Equipment</title>
 </head>
 <body>
 
@@ -88,17 +104,17 @@ if (!$result) {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="view_personnel.php">
+                        <a class="nav-link" href="view_personnel.php">
                             View Personnel
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="add_specialist.php">
+                        <a class="nav-link" href="add_specialist.php">
                             Add Specialist
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="view_specialists.php">
+                        <a class="nav-link" href="view_specialists.php">
                             View Specialists
                         </a>
                     </li>
@@ -122,7 +138,6 @@ if (!$result) {
                             View Software
                         </a>
                     </li>
-                    <!-- Add more business functions as needed -->
                 </ul>
             </div>
         </nav>
@@ -130,42 +145,41 @@ if (!$result) {
         <!-- Content -->
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">View Personnel</h1>
+                <h1 class="h2">Add Equipment</h1>
             </div>
 
-            <!-- Search Bar -->
-            <form action="view_personnel.php" method="post" class="mb-3">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for personnel" name="search" value="<?php echo $search; ?>">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="submit">Search</button>
-                    </div>
+            <!-- Display error or success message if any -->
+            <?php if (!empty($errorMessage)): ?>
+                <div class="alert alert-danger" role="alert">
+                    <?php echo $errorMessage; ?>
                 </div>
-            </form>
+            <?php endif; ?>
+            <?php if (!empty($successMessage)): ?>
+                <div class="alert alert-success" role="alert">
+                    <?php echo $successMessage; ?>
+                </div>
+            <?php endif; ?>
 
-            <!-- Display personnel details -->
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Personnel ID</th>
-                    <th>Name</th>
-                    <th>Job Title</th>
-                    <th>Department</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                            <td>{$row['PersonnelID']}</td>
-                            <td>{$row['Name']}</td>
-                            <td>{$row['JobTitle']}</td>
-                            <td>{$row['Department']}</td>
-                          </tr>";
-                }
-                ?>
-                </tbody>
-            </table>
+            <!-- Equipment Form -->
+            <form action="add_equipment.php" method="post">
+                <div class="form-group">
+                    <label for="equipmentID">Equipment ID:</label>
+                    <input type="number" class="form-control" id="equipmentID" name="equipmentID" required>
+                </div>
+                <div class="form-group">
+                    <label for="equipmentType">Equipment Type:</label>
+                    <input type="text" class="form-control" id="equipmentType" name="equipmentType" required>
+                </div>
+                <div class="form-group">
+                    <label for="equipmentMake">Equipment Make:</label>
+                    <input type="text" class="form-control" id="equipmentMake" name="equipmentMake" required>
+                </div>
+                <div class="form-group">
+                    <label for="serialNumber">Serial Number:</label>
+                    <input type="text" class="form-control" id="serialNumber" name="serialNumber" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Equipment</button>
+            </form>
         </main>
     </div>
 </div>

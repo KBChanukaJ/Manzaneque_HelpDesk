@@ -13,24 +13,23 @@ $operatorID = $_SESSION['operatorID'];
 // Include the database connection file
 include('Connection.php');
 
-// Initialize variables for search and query
+// Initialize variables for search and error message
 $search = "";
-$query = "SELECT * FROM Personnel";
+$errorMessage = "";
 
 // Check if the search form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $search = $_POST['search'];
-    $query .= " WHERE Name LIKE '%$search%' OR JobTitle LIKE '%$search%' OR Department LIKE '%$search%'";
+    $search = filter_input(INPUT_POST, 'search', FILTER_SANITIZE_STRING);
 }
 
-// Execute the query
-$result = $conn->query($query);
+// Fetch software data based on search
+$sql = "SELECT * FROM Software WHERE SoftwareName LIKE '%$search%'";
+$result = $conn->query($sql);
 
 // Check for errors
 if (!$result) {
-    die("Error: " . $conn->error);
+    $errorMessage = "Error: " . $sql . "<br>" . $conn->error;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -40,7 +39,7 @@ if (!$result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css"> <!-- Your custom CSS file -->
-    <title>View Personnel</title>
+    <title>View Software</title>
 </head>
 <body>
 
@@ -88,17 +87,17 @@ if (!$result) {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="view_personnel.php">
+                        <a class="nav-link" href="view_personnel.php">
                             View Personnel
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="add_specialist.php">
+                        <a class="nav-link" href="add_specialist.php">
                             Add Specialist
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="view_specialists.php">
+                        <a class="nav-link" href="view_specialists.php">
                             View Specialists
                         </a>
                     </li>
@@ -122,7 +121,6 @@ if (!$result) {
                             View Software
                         </a>
                     </li>
-                    <!-- Add more business functions as needed -->
                 </ul>
             </div>
         </nav>
@@ -130,38 +128,44 @@ if (!$result) {
         <!-- Content -->
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">View Personnel</h1>
+                <h1 class="h2">View Software</h1>
             </div>
 
-            <!-- Search Bar -->
-            <form action="view_personnel.php" method="post" class="mb-3">
+            <!-- Display error message if any -->
+            <?php if (!empty($errorMessage)): ?>
+                <div class="alert alert-danger" role="alert">
+                    <?php echo $errorMessage; ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Search Form -->
+            <form action="view_software.php" method="post" class="mb-3">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for personnel" name="search" value="<?php echo $search; ?>">
+                    <input type="text" class="form-control" placeholder="Search for software" name="search" value="<?php echo $search; ?>">
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="submit">Search</button>
                     </div>
                 </div>
             </form>
 
-            <!-- Display personnel details -->
-            <table class="table">
+            <!-- Software Table -->
+            <table class="table table-bordered">
                 <thead>
                 <tr>
-                    <th>Personnel ID</th>
-                    <th>Name</th>
-                    <th>Job Title</th>
-                    <th>Department</th>
+                    <th>Software ID</th>
+                    <th>Software Name</th>
+                    <th>License Status</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php
+                // Loop through the result set
                 while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                            <td>{$row['PersonnelID']}</td>
-                            <td>{$row['Name']}</td>
-                            <td>{$row['JobTitle']}</td>
-                            <td>{$row['Department']}</td>
-                          </tr>";
+                    echo "<tr>";
+                    echo "<td>" . $row['SoftwareID'] . "</td>";
+                    echo "<td>" . $row['SoftwareName'] . "</td>";
+                    echo "<td>" . ($row['LicenseStatus'] ? 'Valid' : 'Expired') . "</td>";
+                    echo "</tr>";
                 }
                 ?>
                 </tbody>

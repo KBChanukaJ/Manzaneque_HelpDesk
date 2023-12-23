@@ -13,24 +13,30 @@ $operatorID = $_SESSION['operatorID'];
 // Include the database connection file
 include('Connection.php');
 
-// Initialize variables for search and query
+// Initialize variables for search and display
 $search = "";
-$query = "SELECT * FROM Personnel";
+$errorMessage = "";
 
 // Check if the search form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $search = $_POST['search'];
-    $query .= " WHERE Name LIKE '%$search%' OR JobTitle LIKE '%$search%' OR Department LIKE '%$search%'";
+    // Validate and sanitize search keyword
+    $search = filter_input(INPUT_POST, 'search', FILTER_SANITIZE_STRING);
 }
 
-// Execute the query
-$result = $conn->query($query);
+// Build the WHERE clause based on the search criteria
+$whereClause = "";
+if (!empty($search)) {
+    $whereClause = "WHERE EquipmentID LIKE '%$search%' OR EquipmentType LIKE '%$search%' OR EquipmentMake LIKE '%$search%' OR SerialNumber LIKE '%$search%'";
+}
+
+// Retrieve equipment based on the search criteria
+$sql = "SELECT * FROM Equipment $whereClause";
+$result = $conn->query($sql);
 
 // Check for errors
-if (!$result) {
-    die("Error: " . $conn->error);
+if ($result === FALSE) {
+    $errorMessage = "Error: " . $sql . "<br>" . $conn->error;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -40,7 +46,7 @@ if (!$result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css"> <!-- Your custom CSS file -->
-    <title>View Personnel</title>
+    <title>View Equipment</title>
 </head>
 <body>
 
@@ -88,22 +94,23 @@ if (!$result) {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="view_personnel.php">
+                        <a class="nav-link" href="view_personnel.php">
                             View Personnel
                         </a>
                     </li>
+                    
                     <li class="nav-item">
-                        <a class="nav-link active" href="add_specialist.php">
+                        <a class="nav-link" href="add_specialist.php">
                             Add Specialist
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="view_specialists.php">
+                        <a class="nav-link" href="view_specialists.php">
                             View Specialists
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="add_equipment.php">
+                        <a class="nav-link" href="add_equipment.php">
                             Add Equipment
                         </a>
                     </li>
@@ -130,38 +137,46 @@ if (!$result) {
         <!-- Content -->
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">View Personnel</h1>
+                <h1 class="h2">View Equipment</h1>
             </div>
 
-            <!-- Search Bar -->
-            <form action="view_personnel.php" method="post" class="mb-3">
+            <!-- Display error message if any -->
+            <?php if (!empty($errorMessage)): ?>
+                <div class="alert alert-danger" role="alert">
+                    <?php echo $errorMessage; ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Search Form -->
+            <form action="view_equipment.php" method="post" class="mb-3">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for personnel" name="search" value="<?php echo $search; ?>">
+                    <input type="text" class="form-control" placeholder="Search for equipment" name="search" value="<?php echo $search; ?>">
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="submit">Search</button>
                     </div>
                 </div>
             </form>
 
-            <!-- Display personnel details -->
+            <!-- Equipment Table -->
             <table class="table">
                 <thead>
                 <tr>
-                    <th>Personnel ID</th>
-                    <th>Name</th>
-                    <th>Job Title</th>
-                    <th>Department</th>
+                    <th>Equipment ID</th>
+                    <th>Equipment Type</th>
+                    <th>Equipment Make</th>
+                    <th>Serial Number</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php
+                // Display equipment data
                 while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                            <td>{$row['PersonnelID']}</td>
-                            <td>{$row['Name']}</td>
-                            <td>{$row['JobTitle']}</td>
-                            <td>{$row['Department']}</td>
-                          </tr>";
+                    echo "<tr>";
+                    echo "<td>" . $row['EquipmentID'] . "</td>";
+                    echo "<td>" . $row['EquipmentType'] . "</td>";
+                    echo "<td>" . $row['EquipmentMake'] . "</td>";
+                    echo "<td>" . $row['SerialNumber'] . "</td>";
+                    echo "</tr>";
                 }
                 ?>
                 </tbody>

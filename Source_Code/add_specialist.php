@@ -13,22 +13,53 @@ $operatorID = $_SESSION['operatorID'];
 // Include the database connection file
 include('Connection.php');
 
-// Initialize variables for search and query
-$search = "";
-$query = "SELECT * FROM Personnel";
+// Initialize variables for form data and validation
+$specialistID = $specialistName = $specialty = "";
+$specialistIDError = $specialistNameError = $specialtyError = "";
+$successMessage = $errorMessage = "";
 
-// Check if the search form is submitted
+// Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $search = $_POST['search'];
-    $query .= " WHERE Name LIKE '%$search%' OR JobTitle LIKE '%$search%' OR Department LIKE '%$search%'";
-}
+    // Validate and sanitize form data
+    $specialistID = filter_input(INPUT_POST, 'specialistID', FILTER_SANITIZE_NUMBER_INT);
+    $specialistName = filter_input(INPUT_POST, 'specialistName', FILTER_SANITIZE_STRING);
+    $specialty = filter_input(INPUT_POST, 'specialty', FILTER_SANITIZE_STRING);
 
-// Execute the query
-$result = $conn->query($query);
+    // Validate Specialist ID
+    if (empty($specialistID)) {
+        $specialistIDError = "Specialist ID is required.";
+    }
 
-// Check for errors
-if (!$result) {
-    die("Error: " . $conn->error);
+    // Check if Specialist ID is already registered
+    $checkQuery = "SELECT * FROM Specialists WHERE SpecialistID = '$specialistID'";
+    $checkResult = $conn->query($checkQuery);
+
+    if ($checkResult->num_rows > 0) {
+        $errorMessage = "Specialist ID '$specialistID' is already registered.";
+    } else {
+        // Validate Specialist Name
+        if (empty($specialistName)) {
+            $specialistNameError = "Specialist Name is required.";
+        }
+
+        // Validate Specialty
+        if (empty($specialty)) {
+            $specialtyError = "Specialty is required.";
+        }
+
+        // If no errors, proceed with database operation
+        if (empty($specialistIDError) && empty($specialistNameError) && empty($specialtyError)) {
+            // Insert data into the Specialists table
+            $sql = "INSERT INTO Specialists (SpecialistID, SpecialistName, Specialty) VALUES ('$specialistID', '$specialistName', '$specialty')";
+
+            // Execute the query
+            if ($conn->query($sql) === TRUE) {
+                $successMessage = "Specialist added successfully!";
+            } else {
+                $errorMessage = "Error: " . $sql . "<br>" . $conn->error;
+            }
+        }
+    }
 }
 
 ?>
@@ -40,7 +71,7 @@ if (!$result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css"> <!-- Your custom CSS file -->
-    <title>View Personnel</title>
+    <title>Add Specialist</title>
 </head>
 <body>
 
@@ -88,7 +119,7 @@ if (!$result) {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="view_personnel.php">
+                        <a class="nav-link" href="view_personnel.php">
                             View Personnel
                         </a>
                     </li>
@@ -130,42 +161,41 @@ if (!$result) {
         <!-- Content -->
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">View Personnel</h1>
+                <h1 class="h2">Add Specialist</h1>
             </div>
 
-            <!-- Search Bar -->
-            <form action="view_personnel.php" method="post" class="mb-3">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for personnel" name="search" value="<?php echo $search; ?>">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="submit">Search</button>
-                    </div>
+            <!-- Display success or error messages if any -->
+            <?php if (!empty($successMessage)): ?>
+                <div class="alert alert-success" role="alert">
+                    <?php echo $successMessage; ?>
                 </div>
-            </form>
+            <?php endif; ?>
 
-            <!-- Display personnel details -->
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Personnel ID</th>
-                    <th>Name</th>
-                    <th>Job Title</th>
-                    <th>Department</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                            <td>{$row['PersonnelID']}</td>
-                            <td>{$row['Name']}</td>
-                            <td>{$row['JobTitle']}</td>
-                            <td>{$row['Department']}</td>
-                          </tr>";
-                }
-                ?>
-                </tbody>
-            </table>
+            <?php if (!empty($errorMessage)): ?>
+                <div class="alert alert-danger" role="alert">
+                    <?php echo $errorMessage; ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Form for adding specialists -->
+            <form action="add_specialist.php" method="post">
+                <div class="form-group">
+                    <label for="specialistID">Specialist ID:</label>
+                    <input type="number" class="form-control" id="specialistID" name="specialistID" required>
+                    <small class="text-danger"><?php echo $specialistIDError; ?></small>
+                </div>
+                <div class="form-group">
+                    <label for="specialistName">Specialist Name:</label>
+                    <input type="text" class="form-control" id="specialistName" name="specialistName" required>
+                    <small class="text-danger"><?php echo $specialistNameError; ?></small>
+                </div>
+                <div class="form-group">
+                    <label for="specialty">Specialty:</label>
+                    <input type="text" class="form-control" id="specialty" name="specialty" required>
+                    <small class="text-danger"><?php echo $specialtyError; ?></small>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Specialist</button>
+            </form>
         </main>
     </div>
 </div>

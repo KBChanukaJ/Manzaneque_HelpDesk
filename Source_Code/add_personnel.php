@@ -102,8 +102,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="business_function1.php">
-                            Business Function 1
+                        <a class="nav-link" href="add_problem.php">
+                            Add Problem
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="view_problem.php">
+                            View Problem
                         </a>
                     </li>
                     <li class="nav-item">
@@ -114,6 +119,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <li class="nav-item">
                         <a class="nav-link active" href="view_personnel.php">
                             View Personnel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="add_specialist.php">
+                            Add Specialist
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="view_specialists.php">
+                            View Specialists
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="add_equipment.php">
+                            Add Equipment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="view_equipment.php">
+                            View Equipment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="add_software.php">
+                            Add Software
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="view_software.php">
+                            View Software
                         </a>
                     </li>
                     <!-- Add more business functions as needed -->
