@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (password_verify($password, $row['Password'])) {
                 // Login successful
                 $_SESSION['operatorID'] = $operatorID;
-                showAlert("Login successful!", 'index.php');
+                showAlert("Login successful!", 'dashboard.php');
             } else {
                 showAlert("Invalid password.", 'login.php');
             }
