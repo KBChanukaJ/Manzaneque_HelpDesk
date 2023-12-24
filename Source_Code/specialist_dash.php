@@ -70,53 +70,8 @@ $softwareCount = getRecordCount('Software');
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="add_problem.php">
-                            Add Problem
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="view_problem.php">
+                        <a class="nav-link" href="sp_view_problem.php">
                             View Problem
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="add_personnel.php">
-                            Add Personnel
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="view_personnel.php">
-                            View Personnel
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="add_specialist.php">
-                            Add Specialist
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="view_specialists.php">
-                            View Specialists
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="add_equipment.php">
-                            Add Equipment
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="view_equipment.php">
-                            View Equipment
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="add_software.php">
-                            Add Software
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="view_software.php">
-                            View Software
                         </a>
                     </li>
                     <!-- Add more business functions as needed -->
