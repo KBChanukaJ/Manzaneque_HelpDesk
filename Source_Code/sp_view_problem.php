@@ -10,6 +10,11 @@ function showAlert($message, $redirectUrl) {
     exit();
 }
 
+function getStatusColor($status)
+{
+    return ($status === 'Active') ? 'green' : 'red';
+}
+
 // Check if the user is logged in
 if (!isset($_SESSION['operatorID'])) {
     header("Location: login.php");
@@ -29,6 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $problemNumber = $_POST['problemNumber'];
     $resolutionDetails = $_POST['resolutionDetails'];
     $timeResolved = date("Y-m-d H:i:s"); // Get current timestamp
+
+    $call = $conn->prepare("CALL UpdateProblemStatus(?, ?)");
+    $call->bind_param("is", $problemNumber, $resolutionDetails);
+    $call->execute();
 
     // Prepare the SQL query
     $updateSql = "UPDATE Problems SET ResolutionDetails = ?, TimeResolved = ? WHERE ProblemNumber = ?";
@@ -51,8 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <span class="navbar-brand">Your Company Name</span>
+        <span class="navbar-brand">Manzaneque Limited</span>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
@@ -81,71 +88,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </nav>
 
-<!-- Content -->
-<div class="container mt-4">
-    <h2>View Problems</h2>
-    <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>Problem Number</th>
-            <th>Caller ID</th>
-            <th>Operator ID</th>
-            <th>Problem Type ID</th>
-            <th>Problem Description</th>
-            <th>Time Reported</th>
-            <th>Time Resolved</th>
-            <th>Resolution Details</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php while ($row = $problemsResult->fetch_assoc()): ?>
-            <tr>
-                <td><?php echo $row['ProblemNumber']; ?></td>
-                <td><?php echo $row['CallerID'] ?? 'None'; ?></td>
-                <td><?php echo $row['OperatorID'] ?? 'None'; ?></td>
-                <td><?php echo $row['ProblemTypeID'] ?? 'None'; ?></td>
-                <td><?php echo $row['ProblemDescription']; ?></td>
-                <td><?php echo $row['TimeReported']; ?></td>
-                <td><?php echo $row['TimeResolved'] ?? 'None'; ?></td>
-                <td><?php echo $row['ResolutionDetails'] ?? 'None'; ?></td>
-                <td><?php echo $row['Status']; ?></td>
-                <td>
-                    <button class="btn btn-primary" data-toggle="modal" data-target="#resolutionModal<?php echo $row['ProblemNumber']; ?>">
-                        Get Action
-                    </button>
-                </td>
-            </tr>
-
-            <!-- Resolution Modal -->
-            <div class="modal fade" id="resolutionModal<?php echo $row['ProblemNumber']; ?>" tabindex="-1" role="dialog" aria-labelledby="resolutionModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="resolutionModalLabel">Add Resolution Details</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="" method="post">
-                                <div class="form-group">
-                                    <label for="resolutionDetails">Resolution Details:</label>
-                                    <textarea class="form-control" id="resolutionDetails" name="resolutionDetails" rows="3" required></textarea>
-                                </div>
-                                <input type="hidden" name="problemNumber" value="<?php echo $row['ProblemNumber']; ?>">
-                                <button type="submit" class="btn btn-primary">OK</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+<!-- Sidebar -->
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="specialist_dash.php">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sp_view_problem.php">
+                            View Problem
+                        </a>
+                    </li>
+                    <!-- Add other sidebar items as needed -->
+                </ul>
             </div>
+        </nav>
 
+        <!-- Content -->
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <div class="container mt-4">
+                <div class="pb-2 mb-3 border-bottom">
+                    <h1 class="h2">View Problems</h1>
+                </div>
 
-        <?php endwhile; ?>
-        </tbody>
-    </table>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Problem Number</th>
+                        <th>Caller ID</th>
+                        <th>Operator ID</th>
+                        <th>Problem Type ID</th>
+                        <th>Problem Description</th>
+                        <th>Time Reported</th>
+                        <th>Time Resolved</th>
+                        <th>Resolution Details</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php while ($row = $problemsResult->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo $row['ProblemNumber']; ?></td>
+                            <td><?php echo $row['CallerID'] ?? 'None'; ?></td>
+                            <td><?php echo $row['OperatorID'] ?? 'None'; ?></td>
+                            <td><?php echo $row['ProblemTypeID'] ?? 'None'; ?></td>
+                            <td><?php echo $row['ProblemDescription']; ?></td>
+                            <td><?php echo $row['TimeReported']; ?></td>
+                            <td><?php echo $row['TimeResolved'] ?? 'None'; ?></td>
+                            <td><?php echo $row['ResolutionDetails'] ?? 'None'; ?></td>
+                            <td style="color: <?php echo getStatusColor($row['Status']); ?>"><?php echo $row['Status']; ?></td>
+                            <td>
+                                <button class="btn btn-primary" data-toggle="modal" data-target="#resolutionModal<?php echo $row['ProblemNumber']; ?>" <?php echo ($row['Status'] === 'Closed') ? 'disabled' : ''; ?>>
+                                    Get Action
+                                </button>
+                            </td>
+
+                        </tr>
+
+                        <!-- Resolution Modal -->
+                        <div class="modal fade" id="resolutionModal<?php echo $row['ProblemNumber']; ?>" tabindex="-1" role="dialog" aria-labelledby="resolutionModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="resolutionModalLabel">Add Resolution Details</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="" method="post">
+                                            <div class="form-group">
+                                                <label for="resolutionDetails">Resolution Details:</label>
+                                                <textarea class="form-control" id="resolutionDetails" name="resolutionDetails" rows="3" required></textarea>
+                                            </div>
+                                            <input type="hidden" name="problemNumber" value="<?php echo $row['ProblemNumber']; ?>">
+                                            <button type="submit" class="btn btn-primary">OK</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -16,7 +16,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-center">Helpdesk Operator Registration</h3>
+                    <h3 class="text-center">Registration</h3>
                 </div>
                 <div class="card-body">
                     <form action="register_process.php" method="post">
