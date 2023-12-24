@@ -26,7 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (password_verify($password, $row['Password'])) {
                 // Login successful
                 $_SESSION['operatorID'] = $operatorID;
-                showAlert("Login successful!", 'index.php');
+
+                // Redirect based on role
+                $role = $row['Role'];
+                if ($role === 'HelpDeskOperator') {
+                    showAlert("Login successful! Redirecting to Dashboard.", 'dashboard.php');
+                } elseif ($role === 'Specialist') {
+                    showAlert("Login successful! Redirecting to Specialist Dashboard.", 'specialist_dash.php');
+                } else {
+                    showAlert("Invalid role.", 'login.php');
+                }
             } else {
                 showAlert("Invalid password.", 'login.php');
             }

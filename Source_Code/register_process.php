@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $operatorID = $_POST['operatorID'];
     $operatorName = $_POST['operatorName'];
     $password = $_POST['password'];
+    $role = $_POST['role'];
 
     // Validate Operator ID is a number
     if (!isNumber($operatorID)) {
@@ -36,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
             // Insert data into the HelpdeskOperators table
-            $insertQuery = "INSERT INTO HelpdeskOperators (OperatorID, OperatorName, Password) VALUES ('$operatorID', '$operatorName', '$hashedPassword')";
+            $insertQuery = "INSERT INTO HelpdeskOperators (OperatorID, OperatorName, Password, Role) 
+                            VALUES ('$operatorID', '$operatorName', '$hashedPassword', '$role')";
 
             // Execute the query
             if ($conn->query($insertQuery) === TRUE) {
