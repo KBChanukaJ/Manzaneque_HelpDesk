@@ -32,6 +32,13 @@
                             <label for="password">Password:</label>
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
+                        <div class="form-group">
+                            <label for="role">Role:</label>
+                            <select class="form-control" id="role" name="role" required>
+                                <option value="HelpDeskOperator">Help Desk Operator</option>
+                                <option value="Specialist">Specialist</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary btn-block">Register</button>
                     </form>
                     <p class="mt-3 text-center">Already have an account? <a href="login.php">Login here</a></p>
