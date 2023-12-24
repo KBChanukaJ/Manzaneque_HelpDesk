@@ -15,18 +15,20 @@ if (!isset($_SESSION['operatorID'])) {
 
 $operatorID = $_SESSION['operatorID'];
 
+
+
 $personnelQuery = "SELECT PersonnelID, Name FROM Personnel";
 $personnelResult = $conn->query($personnelQuery);
 
 // Fetch problem types for the dropdown
-$problemTypesQuery = "SELECT ProblemTypeID, ProblemTypeName FROM ProblemTypes"; // Changed ProblemTypeDescription to ProblemTypeName
+$problemTypesQuery = "SELECT ProblemTypeID, ProblemTypeName  FROM ProblemTypes"; // Changed ProblemTypeDescription to ProblemTypeName
 $problemTypesResult = $conn->query($problemTypesQuery);
 
 
-$specialistsQuery = "SELECT SpecialistID, SpecialistName FROM Specialists";
+$specialistsQuery = "SELECT SpecialistID, SpecialistName , Specialty  FROM Specialists";
 $specialistsResult = $conn->query($specialistsQuery);
 
-$equipmentQuery = "SELECT EquipmentID, EquipmentMake FROM Equipment";
+$equipmentQuery = "SELECT EquipmentID, EquipmentMake , EquipmentType FROM Equipment";
 $equipmentResult = $conn->query($equipmentQuery);
 
 $softwareQuery = "SELECT SoftwareID, SoftwareName FROM Software";
@@ -90,7 +92,7 @@ if ($stmt->execute()) {
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <span class="navbar-brand">Your Company Name</span>
+        <span class="navbar-brand">Manzaneque Limited</span>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
@@ -110,9 +112,59 @@ if ($stmt->execute()) {
         <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
             <div class="sidebar-sticky">
                 <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="dashboard.php">
+                <li class="nav-item">
+                        <a class="nav-link active" href="dashboard.php">
                             Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="add_problem.php">
+                            Add Problem
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="view_problem.php">
+                            View Problem
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="add_personnel.php">
+                            Add Personnel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="view_personnel.php">
+                            View Personnel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="add_specialist.php">
+                            Add Specialist
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="view_specialists.php">
+                            View Specialists
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="add_equipment.php">
+                            Add Equipment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="view_equipment.php">
+                            View Equipment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="add_software.php">
+                            Add Software
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="view_software.php">
+                            View Software
                         </a>
                     </li>
                     <!-- Add other sidebar items as needed -->
@@ -170,11 +222,11 @@ if ($stmt->execute()) {
 
                 <!-- Assigned Specialist is selected from the dropdown -->
                 <div class="form-group">
-                    <label for="assignedSpecialist">Assigned Specialist:</label>
+                <label for="assignedSpecialist">Assigned Specialist:</label>
                     <select class="form-control" id="assignedSpecialist" name="assignedSpecialist">
                         <option value="">Choose...</option>
                         <?php while ($row = $specialistsResult->fetch_assoc()): ?>
-                            <option value="<?php echo $row['SpecialistID']; ?>"><?php echo $row['SpecialistName']; ?></option>
+                        <option value="<?php echo $row['SpecialistID']; ?>"><?php echo $row['SpecialistName'] . ' (' . $row['Specialty'] . ')'; ?></option> <!-- Display both SpecialistName and Specialty but use SpecialistID as the option value -->
                         <?php endwhile; ?>
                     </select>
                 </div>
@@ -203,7 +255,7 @@ if ($stmt->execute()) {
                         $equipmentResult->data_seek(0);
                         while ($row = $equipmentResult->fetch_assoc()):
                         ?>
-                            <option value="<?php echo $row['EquipmentID']; ?>"><?php echo $row['EquipmentMake']; ?></option>
+                            <option value="<?php echo $row['EquipmentID']; ?>"><?php echo $row['EquipmentMake']. ' (' . $row['EquipmentType'] . ')'; ?></option>
                         <?php endwhile; ?>
                     </select>
                 </div>
