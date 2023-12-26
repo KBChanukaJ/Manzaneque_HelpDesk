@@ -1,0 +1,77 @@
+DATABASE DESIGN
+
+CREATE DATABASE ManzanequeHelpdesk;
+
+CREATE TABLE Personnel (
+    PersonnelID INT PRIMARY KEY,
+    Name VARCHAR(255),
+    JobTitle VARCHAR(255),
+    Department VARCHAR(255)
+);
+
+CREATE TABLE Equipment (
+    EquipmentID INT PRIMARY KEY,
+    EquipmentType VARCHAR(255),
+    EquipmentMake VARCHAR(255),
+    SerialNumber VARCHAR(255)
+);
+
+CREATE TABLE Software (
+    SoftwareID INT PRIMARY KEY,
+    SoftwareName VARCHAR(255),
+    LicenseStatus BOOLEAN
+);
+
+CREATE TABLE HelpdeskOperators (
+    OperatorID INT PRIMARY KEY,
+    OperatorName VARCHAR(255),
+    Password VARCHAR(255),
+    Role VARCHAR(50) -- Add Role field
+);
+
+
+CREATE TABLE Specialists (
+    SpecialistID INT PRIMARY KEY,
+    SpecialistName VARCHAR(255),
+    Specialty VARCHAR(255)
+);
+
+CREATE TABLE ProblemTypes (
+    ProblemTypeID INT PRIMARY KEY,
+    ProblemTypeName VARCHAR(255),
+    ProblemTypeDescription VARCHAR(255)
+);
+
+CREATE TABLE Problems (
+    ProblemNumber INT PRIMARY KEY,
+    CallerID INT,
+    OperatorID INT,
+    ProblemTypeID INT,
+    ProblemDescription TEXT,
+    TimeReported TIMESTAMP,
+    TimeResolved TIMESTAMP,
+    ResolutionDetails TEXT,
+    SpecialistID INT,
+    EquipmentID INT,
+    SoftwareID INT,
+    Status VARCHAR(50),
+    FOREIGN KEY (CallerID) REFERENCES Personnel(PersonnelID),
+    FOREIGN KEY (OperatorID) REFERENCES HelpdeskOperators(OperatorID),
+    FOREIGN KEY (ProblemTypeID) REFERENCES ProblemTypes(ProblemTypeID),
+    FOREIGN KEY (SpecialistID) REFERENCES Specialists(SpecialistID),
+    FOREIGN KEY (EquipmentID) REFERENCES Equipment(EquipmentID),
+    FOREIGN KEY (SoftwareID) REFERENCES Software(SoftwareID)
+);
+
+
+DELIMITER //
+
+CREATE PROCEDURE UpdateProblemStatus(IN p_problemNumber INT, IN p_resolutionDetails TEXT)
+BEGIN
+    -- Update the ResolutionDetails and TimeResolved
+    UPDATE Problems
+    SET ResolutionDetails = p_resolutionDetails, TimeResolved = CURRENT_TIMESTAMP, Status = 'Closed'
+    WHERE ProblemNumber = p_problemNumber;
+END //
+
+DELIMITER ;
